@@ -1,6 +1,6 @@
-import { createConstructionSite, getObjectsByPrototype } from 'game/utils';
+import { createConstructionSite, getObjectsByPrototype, getTerrainAt } from 'game/utils';
 import { StructureTower, StructureContainer, Creep, StructureSpawn, Source, } from 'game/prototypes';
-import { ERR_NOT_IN_RANGE, RESOURCE_ENERGY, MOVE, WORK, CARRY, ATTACK, RANGED_ATTACK, HEAL, TOUGH, LEFT, TOP_LEFT, TOP, TOP_RIGHT, RIGHT, BOTTOM_RIGHT, BOTTOM, BOTTOM_LEFT } from 'game/constants';
+import { ERR_NOT_IN_RANGE, RESOURCE_ENERGY, MOVE, WORK, CARRY, ATTACK, RANGED_ATTACK, HEAL, TOUGH, LEFT, TOP_LEFT, TOP, TOP_RIGHT, RIGHT, BOTTOM_RIGHT, BOTTOM, BOTTOM_LEFT, TERRAIN_WALL } from 'game/constants';
 
 import { RESOURCE_SCORE, ScoreCollector } from 'arena/season_beta/collect_and_control/basic';
 
@@ -24,9 +24,10 @@ let maxHarvester = 3
 
 const workersPosition = {
     up : [
-        {x:3-1 , y:1 , creep: null},
+        {x:3 , y:1 , creep: null},
         {x:4 , y:1 , creep: null},
         {x:5 , y:1 , creep: null},
+
     ],
     down: [
         {x:3 , y:97 , creep: null},
@@ -34,6 +35,8 @@ const workersPosition = {
         {x:5 , y:97 , creep: null},
     ]
 }
+
+let firsId = null
 
 export function loop() {
     const spawner = getObjectsByPrototype(StructureSpawn).filter(spawner => spawner.my)[0]
@@ -46,17 +49,6 @@ export function loop() {
 
     updateFlags()
 
-    if (shouldBuildWorker) {
-        const o = spawner.spawnCreep([WORK, CARRY]).object
-        if (o) {
-            o.kind ='worker'
-            o.isWorking = false
-            o.isPulled = false
-            o.pulledBy = null
-            workers.push(o)
-        }
-    }
-
     if (shouldBuildMover) {
         const o = spawner.spawnCreep([MOVE, CARRY]).object
         if (o) {
@@ -65,6 +57,17 @@ export function loop() {
             o.isPulling = false
             o.pullingCreep = null
             movers.push(o)
+        }
+    }
+
+    if (shouldBuildWorker) {
+        const o = spawner.spawnCreep([WORK, CARRY]).object
+        if (o) {
+            o.kind ='worker'
+            o.isWorking = false
+            o.isPulled = false
+            o.pulledBy = null
+            workers.push(o)
         }
     }
 
@@ -99,7 +102,7 @@ const updateFlags = () => {
         shouldBuildWorker = true
     }
 
-    if (workers.length >= 2) {
+    if (workers.length >= 3) {
         shouldBuildMover = false
         shouldBuildWorker = false
         shouldBuildHarvester = true
@@ -170,44 +173,74 @@ const createArmy = (spawner) => {
 
 const getFreeDestinationToPull = (creep, isUp) => {
     const free = workersPosition[isUp ? 'up' : 'down'].find(position => position.creep == null);
-    console.log(creep.pos)
     if (free) {
+        console.log(free)
         if (free.x < creep.pullingCreep.x && free.y == creep.pullingCreep.y) {
             creep.pull(creep.pullingCreep)
             creep.pullingCreep.moveTo(creep)
+            console.log('LEFT')
             creep.move(LEFT)
         } else if (free.x < creep.pullingCreep.x && free.y < creep.pullingCreep.y) {
             creep.pull(creep.pullingCreep)
             creep.pullingCreep.moveTo(creep)
+            console.log('TOP_LEFT')
             creep.move(TOP_LEFT)
         } else if (free.x == creep.pullingCreep.x && free.y < creep.pullingCreep.y) {
+
             creep.pull(creep.pullingCreep)
             creep.pullingCreep.moveTo(creep)
-            creep.move(TOP)
+            console.log('TOP')
+            if (getTerrainAt({x: creep.x , y: creep.y - 1}) == TERRAIN_WALL || thereIsAworkerHere({x: creep.x , y: creep.y - 1}, isUp)) {
+                if (isUp) {
+                    creep.move(TOP_RIGHT)
+                }
+            } else {
+                creep.move(TOP)
+
+            }
+
         } else if (free.x > creep.pullingCreep.x && free.y < creep.pullingCreep.y) {
+
             creep.pull(creep.pullingCreep)
             creep.pullingCreep.moveTo(creep)
-            creep.move(TOP_RIGHT)
+            console.log('TOP_RIGHT')
+            if (getTerrainAt({x: creep.x + 1, y: creep.y - 1}) == TERRAIN_WALL) {
+                if (isUp) {
+                    creep.move(RIGHT)
+                }
+            } else {
+                creep.move(TOP_RIGHT)
+            }
         } else if (free.x > creep.pullingCreep.x && free.y == creep.pullingCreep.y) {
             creep.pull(creep.pullingCreep)
             creep.pullingCreep.moveTo(creep)
+            console.log('RIGHT')
             creep.move(RIGHT)
         } else if (free.x > creep.pullingCreep.x && free.y > creep.pullingCreep.y) {
             creep.pull(creep.pullingCreep)
             creep.pullingCreep.moveTo(creep)
+            console.log('BOTTOM_RIGHT')
             creep.move(BOTTOM_RIGHT)
         } else if (free.x == creep.pullingCreep.x && free.y > creep.pullingCreep.y) {
             creep.pull(creep.pullingCreep)
             creep.pullingCreep.moveTo(creep)
+            console.log('BOTTOM')
             creep.move(BOTTOM)
         } else if (free.x < creep.x && free.y > creep.pullingCreep.y) {
             creep.pull(creep.pullingCreep)
             creep.pullingCreep.moveTo(creep)
+            console.log('BOTTOM_LEFT')
             creep.move(BOTTOM_LEFT)
-        } else if (free.x == creep.x && free.y == creep.pullingCreep.y) {
+        } 
+        if (free.x == creep.pullingCreep.x && free.y == creep.pullingCreep.y) {
             free.creep = creep.pullingCreep
             creep.isPulling = false
+            creep.pullingCreep.isWorking = true
             creep.pullingCreep = null
+            console.log('placé')
+            if(isUp) {
+                creep.move(BOTTOM_LEFT)
+            }
         }
     }else {
         console.log('no more free spot')
@@ -222,14 +255,21 @@ const handleMover = (spawner, source, creep) => {
 
     const isUp = spawner.y - source.y > 0
 
-    if (creep.spawning || !creep.store) {return}
+    if (isFuckingSpawning(creep, spawner) || !creep.store) {return}
 
-    const isWorkerToMove = workers.some(worker => worker.isWorking == false && worker.isPulled == false && !isFuckingSpawning(worker, spawner))
+    if (firsId == null) {
+        firsId = creep.id
+        creep.move(BOTTOM_LEFT)
+        return
+    }
+    
 
+    const isWorkerToMove = workers.some(worker => worker.isWorking == false && !isFuckingSpawning(worker, spawner) && !workerIsInPlace(worker, isUp))
+    console.log(isWorkerToMove)
     if (isWorkerToMove) {
-        // console.log(workers.find(worker => worker.isWorking == false && worker.isPulled == false && !isFuckingSpawning(worker, spawner)))
+        // console.log(workers.find(worker => worker.isWorking == false && !isFuckingSpawning(worker, spawner) && !workerIsInPlace(worker, isUp)))
         if (!creep.isPulling) {
-            const workerToMove = workers.find(worker => worker.isWorking == false && worker.isPulled == false && !isFuckingSpawning(worker, spawner))
+            const workerToMove = workers.find(worker => worker.isWorking == false && !isFuckingSpawning(worker, spawner) && !workerIsInPlace(worker, isUp))
             creep.pull(workerToMove)
             workerToMove.moveTo(creep)
             creep.isPulling = true
@@ -256,7 +296,9 @@ const handleMover = (spawner, source, creep) => {
 }
 
 const handleWorker = (spawner, source, creep) => {
+
     if (creep.spawning || !creep.store) {return}
+
     // console.log(creep.store.getFreeCapacity(RESOURCE_ENERGY) > 0)
     if (creep.store.getFreeCapacity(RESOURCE_ENERGY) > 0) {
         if (creep.harvest(source) === ERR_NOT_IN_RANGE) {
@@ -348,8 +390,16 @@ const handleAttack = (creepsArmy) => {
     }
 }
 
+const thereIsAworkerHere = (pos, isUp) => {
+    return workersPosition[isUp ? 'up' : 'down'].find(position => position.x == pos.x &&  position.y == pos.y && position.creep)
+}
+
 const isFuckingSpawning = (creep, spawner) => {
     return creep.spawning || !creep.id || !creep.exists || (creep.x == spawner.x && creep.y == spawner.y)
+}
+
+const workerIsInPlace = (worker, isUp) => {
+    return workersPosition[isUp ? 'up' : 'down'].find(position => position.creep == worker);
 }
 
 const heal = (creep, creepToHeal) => {
