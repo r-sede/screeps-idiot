@@ -53,8 +53,6 @@ export function loop() {
 }
 
 
-
-
 const createHarvester = (workers, spawner) => {
     let okToBuildHarvester = true
 
@@ -130,8 +128,7 @@ const handleWorker = (spawner, source, creep) => {
 
 const handleScoreHarvester = (scoreCollector, creep) => {
     if (!creep.store) {return}
-    const containers = getObjectsByPrototype(StructureContainer)
-    console.log(containers)
+    const containers = getObjectsByPrototype(StructureContainer).filter(container => container.store.score > 0)
     const container = creep.findClosestByPath(containers)
     if (creep.store.getFreeCapacity(RESOURCE_SCORE) > 0) {
         if (creep.withdraw(container, RESOURCE_SCORE) === ERR_NOT_IN_RANGE) {
@@ -170,6 +167,11 @@ const handleAttack = (creepsArmy) => {
                 heal(healer, sortedInjuredCreepsArmy[0])
             }
         });
+    } else {
+        myHealers.forEach(healer => {
+            const closeDps = healer.findClosestByPath(myDPS)
+            follow(healer, closeDps)
+        });
     }
 
     if (sortedHealerEnemy.length) {
@@ -194,6 +196,9 @@ const heal = (creep, creepToHeal) => {
             creep.moveTo(creepToHeal);
         }
     }
+}
+const follow = (creep, creepToFollow) => {
+        creep.moveTo(creepToFollow)
 }
 const rangedAttack = (creep, creepToAttack) => {
     if (creep.rangedAttack(creepToAttack) == ERR_NOT_IN_RANGE) {
