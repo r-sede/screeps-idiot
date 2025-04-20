@@ -1,6 +1,6 @@
 import { createConstructionSite, getObjectsByPrototype } from 'game/utils';
 import { StructureTower, StructureContainer, Creep, StructureSpawn, Source, } from 'game/prototypes';
-import { ERR_NOT_IN_RANGE, RESOURCE_ENERGY, MOVE, WORK, CARRY, ATTACK, RANGED_ATTACK, HEAL } from 'game/constants';
+import { ERR_NOT_IN_RANGE, RESOURCE_ENERGY, MOVE, WORK, CARRY, ATTACK, RANGED_ATTACK, HEAL, TOUGH } from 'game/constants';
 
 import { RESOURCE_SCORE, ScoreCollector } from 'arena/season_beta/collect_and_control/basic';
 
@@ -94,9 +94,9 @@ const createArmy = (scoreHarvester, spawner) => {
             }
         } else if (counter == 2) {
             //cac
-            const o = spawner.spawnCreep([MOVE, ATTACK]).object
+            const o = spawner.spawnCreep([MOVE, RANGED_ATTACK, RANGED_ATTACK, TOUGH ]).object
             if (o) {
-                o.kind = 'cac'
+                o.kind = 'ranged'
                 creepsArmy.push(o)
                 counter++
             }
@@ -184,13 +184,22 @@ const handleAttack = (creepsArmy) => {
                 attack(dps, dps.findClosestByPath(sortedHealerEnemy))
             }
         })
-    } else {
+    } else if (enemy.length) {
         myDPS.forEach(dps => {
             if (dps.kind == 'ranged') {
                 // console.log(dps)
                 rangedAttack(dps, dps.findClosestByPath(enemy))
             } else {
                 attack(dps, dps.findClosestByPath(enemy))
+            }
+        })
+    } else {
+        myDPS.forEach(dps => {
+            if (dps.kind == 'ranged') {
+                // console.log(dps)
+                rangedAttack(dps, dps.findClosestByPath(enemySpawn))
+            } else {
+                attack(dps, dps.findClosestByPath(enemySpawn))
             }
         })
     }
