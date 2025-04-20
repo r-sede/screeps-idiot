@@ -11,6 +11,24 @@ let shouldAttack = false
 
 const scoreHarvester = []
 
+let shouldBuildWorker = true
+let shouldBuildHarvester = false
+let shouldBuildArmy = false
+
+const updateFlags = () => {
+    if (workers.length >= 2) {
+        shouldBuildWorker = false
+        shouldBuildHarvester = true
+    }
+
+    if (scoreHarvester.length >= 3) {
+        shouldBuildWorker = false
+        shouldBuildHarvester = false
+        shouldBuildArmy = true
+    }
+
+}
+
 export function loop() {
     const spawner = getObjectsByPrototype(StructureSpawn).filter(spawner => spawner.my)[0]
     const sources  = getObjectsByPrototype(Source)
@@ -18,9 +36,9 @@ export function loop() {
 
     const scoreCollector = getObjectsByPrototype(ScoreCollector)[0]
 
+    updateFlags()
 
-
-    if (workers.length <= 1 && !spawner.spawning) {
+    if (shouldBuildWorker) {
         const o = spawner.spawnCreep([MOVE, WORK, CARRY]).object
         if (o) {
             o.kind ='worker'
@@ -28,19 +46,17 @@ export function loop() {
         }
     }
 
-    workers.forEach(worker => {
-        handleWorker(spawner, source, worker)
-
-    })
-
     createHarvester(workers, spawner)
 
-    createArmy(workers, spawner)
+    createArmy(scoreHarvester, spawner)
+
+    workers.forEach(worker => {
+        handleWorker(spawner, source, worker)
+    })
 
 
     scoreHarvester.forEach(worker => {
         handleScoreHarvester(scoreCollector, worker)
-
     })
 
     if (creepsArmy.length > 3) {
@@ -54,15 +70,8 @@ export function loop() {
 
 
 const createHarvester = (workers, spawner) => {
-    let okToBuildHarvester = true
 
-    workers.forEach(worker => {
-        if ( !(worker && worker.store && !spawner.spawning)) {
-            okToBuildHarvester = false
-        }
-    })
-
-    if (okToBuildHarvester) {
+    if (shouldBuildHarvester) {
         const o = spawner.spawnCreep([MOVE,MOVE,MOVE,CARRY,CARRY,CARRY]).object
         if (o) {
             o.kind = 'harvest'
@@ -72,17 +81,9 @@ const createHarvester = (workers, spawner) => {
     }
 }
 
-const createArmy = (workers, spawner) => {
+const createArmy = (scoreHarvester, spawner) => {
 
-    let okToBuildArmy = true
-
-    workers.forEach(worker => {
-        if ( !(worker && worker.store && !spawner.spawning && scoreHarvester.length >= 2)  ) {
-            okToBuildArmy = false
-        }
-    })
-
-    if (okToBuildArmy) {
+    if (shouldBuildArmy) {
         if (counter == 0 || counter == 1) {
             //ranged
             const o = spawner.spawnCreep([MOVE, RANGED_ATTACK]).object
@@ -114,7 +115,7 @@ const createArmy = (workers, spawner) => {
 }
 
 const handleWorker = (spawner, source, creep) => {
-    if (!creep.store) {return}
+    if (creep.spawning || !creep.store) {return}
     if (creep.store.getFreeCapacity(RESOURCE_ENERGY) > 0) {
         if (creep.harvest(source) === ERR_NOT_IN_RANGE) {
             creep.moveTo(source)
@@ -183,10 +184,16 @@ const handleAttack = (creepsArmy) => {
                 attack(dps, dps.findClosestByPath(sortedHealerEnemy))
             }
         })
+    } else {
+        myDPS.forEach(dps => {
+            if (dps.kind == 'ranged') {
+                // console.log(dps)
+                rangedAttack(dps, dps.findClosestByPath(enemy))
+            } else {
+                attack(dps, dps.findClosestByPath(enemy))
+            }
+        })
     }
-
-
-
 }
 
 
