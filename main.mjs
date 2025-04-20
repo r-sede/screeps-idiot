@@ -170,7 +170,7 @@ const createArmy = (spawner) => {
 
 const getFreeDestinationToPull = (creep, isUp) => {
     const free = workersPosition[isUp ? 'up' : 'down'].find(position => position.creep == null);
-
+    console.log(creep.pos)
     if (free) {
         if (free.x < creep.pullingCreep.x && free.y == creep.pullingCreep.y) {
             creep.pull(creep.pullingCreep)
@@ -227,7 +227,7 @@ const handleMover = (spawner, source, creep) => {
     const isWorkerToMove = workers.some(worker => worker.isWorking == false && worker.isPulled == false && !isFuckingSpawning(worker, spawner))
 
     if (isWorkerToMove) {
-        console.log(workers.find(worker => worker.isWorking == false && worker.isPulled == false && !isFuckingSpawning(worker, spawner)))
+        // console.log(workers.find(worker => worker.isWorking == false && worker.isPulled == false && !isFuckingSpawning(worker, spawner)))
         if (!creep.isPulling) {
             const workerToMove = workers.find(worker => worker.isWorking == false && worker.isPulled == false && !isFuckingSpawning(worker, spawner))
             creep.pull(workerToMove)
