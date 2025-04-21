@@ -196,9 +196,7 @@ const getFreeDestinationToPull = (creep, isUp) => {
                 }
             } else {
                 creep.move(TOP)
-
             }
-
         } else if (free.x > creep.pullingCreep.x && free.y < creep.pullingCreep.y) {
 
             creep.pull(creep.pullingCreep)
