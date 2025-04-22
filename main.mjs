@@ -9,24 +9,42 @@ const creepsArmy = []
 const workers = []
 let shouldAttack = false
 
-const scoreHarvester = []
+let scoreHarvester = []
 
 let shouldBuildWorker = true
 let shouldBuildHarvester = false
 let shouldBuildArmy = false
 
+let maxHarvester = 3
+let harversterCounter = 0
 const updateFlags = () => {
     if (workers.length >= 2) {
         shouldBuildWorker = false
         shouldBuildHarvester = true
     }
 
-    if (scoreHarvester.length >= 3) {
+    if (scoreHarvester.length >= maxHarvester) {
         shouldBuildWorker = false
         shouldBuildHarvester = false
         shouldBuildArmy = true
     }
 
+}
+
+const updateHarvesterNumber = () => {
+    const enemy = getObjectsByPrototype(Creep).filter(creep => !creep.my)
+    const harvesterEnemey = enemy.filter(creep => creep.body.some(bodyPart => bodyPart.type == CARRY) && !creep.body.some(bodyPart => bodyPart.type == WORK))
+    // console.log(harvesterEnemey.length)
+    if (harvesterEnemey.length >= 3) {
+        maxHarvester = harvesterEnemey.length + 2
+    } else {
+        maxHarvester = 3
+    }
+}
+
+
+const cleanDeadCreeps = (creepArray) => {
+    return creepArray.filter(creep => creep && creep.exists);
 }
 
 export function loop() {
@@ -36,6 +54,8 @@ export function loop() {
 
     const scoreCollector = getObjectsByPrototype(ScoreCollector)[0]
 
+    scoreHarvester = cleanDeadCreeps(scoreHarvester)
+    // updateHarvesterNumber()
     updateFlags()
 
     if (shouldBuildWorker) {
@@ -59,7 +79,7 @@ export function loop() {
         handleScoreHarvester(scoreCollector, worker)
     })
 
-    if (creepsArmy.length > 3) {
+    if (creepsArmy.length > 1) {
         shouldAttack = true
     }
 
@@ -72,11 +92,13 @@ export function loop() {
 const createHarvester = (workers, spawner) => {
 
     if (shouldBuildHarvester) {
-        const o = spawner.spawnCreep([MOVE,MOVE,MOVE,CARRY,CARRY,CARRY]).object
+        let  o = spawner.spawnCreep([MOVE,MOVE,MOVE,CARRY,CARRY,CARRY]).object
+            // o = spawner.spawnCreep([MOVE,MOVE,CARRY,CARRY]).object
+        // }
         if (o) {
             o.kind = 'harvest'
             scoreHarvester.push(o)
-            counter++
+            harversterCounter++
         }
     }
 }
@@ -86,7 +108,8 @@ const createArmy = (scoreHarvester, spawner) => {
     if (shouldBuildArmy) {
         if (counter == 0 || counter == 1) {
             //ranged
-            const o = spawner.spawnCreep([MOVE, RANGED_ATTACK]).object
+            const o = spawner.spawnCreep([MOVE, RANGED_ATTACK, RANGED_ATTACK, MOVE ]).object
+            // const o = spawner.spawnCreep([MOVE, RANGED_ATTACK]).object
             if (o) {
                 o.kind = 'ranged'
                 creepsArmy.push(o)
@@ -94,24 +117,28 @@ const createArmy = (scoreHarvester, spawner) => {
             }
         } else if (counter == 2) {
             //cac
-            const o = spawner.spawnCreep([MOVE, RANGED_ATTACK, RANGED_ATTACK, TOUGH ]).object
+            const o = spawner.spawnCreep([MOVE, RANGED_ATTACK, RANGED_ATTACK, MOVE ]).object
             if (o) {
                 o.kind = 'ranged'
-                creepsArmy.push(o)
-                counter++
-            }
-        }
-        else if (counter == 3) {
-            //heal
-            const o = spawner.spawnCreep([MOVE, HEAL]).object
-            if (o) {
-                o.kind = 'heal'
-                o.targetToHeal = null
                 creepsArmy.push(o)
                 counter = 0
             }
         }
+        // else if (counter == 3) {
+        //     //heal
+        //     const o = spawner.spawnCreep([MOVE, HEAL]).object
+        //     if (o) {
+        //         o.kind = 'heal'
+        //         o.targetToHeal = null
+        //         creepsArmy.push(o)
+        //         counter = 0
+        //     }
+        // }
     }
+}
+
+const isFuckingSpawning = (creep, spawner) => {
+    return creep.spawning || !creep.id || !creep.exists || (creep.x == spawner.x && creep.y == spawner.y)
 }
 
 const handleWorker = (spawner, source, creep) => {
