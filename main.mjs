@@ -17,6 +17,7 @@ let shouldBuildArmy = false
 
 let maxHarvester = 3
 let harversterCounter = 0
+
 const updateFlags = () => {
     if (workers.length >= 2) {
         shouldBuildWorker = false
@@ -92,8 +93,8 @@ export function loop() {
 const createHarvester = (workers, spawner) => {
 
     if (shouldBuildHarvester) {
-        let  o = spawner.spawnCreep([MOVE,MOVE,MOVE,CARRY,CARRY,CARRY]).object
-            // o = spawner.spawnCreep([MOVE,MOVE,CARRY,CARRY]).object
+        // let  o = spawner.spawnCreep([MOVE,MOVE,MOVE,CARRY,CARRY,CARRY]).object
+            let o = spawner.spawnCreep([MOVE,CARRY,MOVE,CARRY]).object
         // }
         if (o) {
             o.kind = 'harvest'
@@ -106,20 +107,21 @@ const createHarvester = (workers, spawner) => {
 const createArmy = (scoreHarvester, spawner) => {
 
     if (shouldBuildArmy) {
-        if (counter == 0 || counter == 1) {
+        if (counter == 0 || counter == 1 || counter == 2 || counter == 3 || counter == 4 || counter == 5) {
             //ranged
-            const o = spawner.spawnCreep([MOVE, RANGED_ATTACK, RANGED_ATTACK, MOVE ]).object
-            // const o = spawner.spawnCreep([MOVE, RANGED_ATTACK]).object
+            const o = spawner.spawnCreep([RANGED_ATTACK, MOVE, RANGED_ATTACK, MOVE ]).object
+            // const o = spawner.spawnCreep([RANGED_ATTACK, MOVE]).object
             if (o) {
                 o.kind = 'ranged'
                 creepsArmy.push(o)
                 counter++
             }
-        } else if (counter == 2) {
-            //cac
-            const o = spawner.spawnCreep([MOVE, RANGED_ATTACK, RANGED_ATTACK, MOVE ]).object
+        } else if (counter == 6) {
+            //heal
+            const o = spawner.spawnCreep([MOVE, HEAL, MOVE, HEAL]).object
             if (o) {
-                o.kind = 'ranged'
+                o.kind = 'heal'
+                o.targetToHeal = null
                 creepsArmy.push(o)
                 counter = 0
             }
@@ -172,7 +174,7 @@ const handleScoreHarvester = (scoreCollector, creep) => {
 const handleAttack = (creepsArmy) => {
     
     const enemy = getObjectsByPrototype(Creep).filter(creep => !creep.my)
-    const notHealerEnemy = enemy.filter(creep => creep.body.some(bodyPart => bodyPart.type != HEAL))
+    // const notHealerEnemy = enemy.filter(creep => creep.body.some(bodyPart => bodyPart.type != HEAL))
     const sortedInjuredCreepsArmy = creepsArmy.filter(creep => creep.hits < creep.hitMax).sort((a, b) => a.hits - b.hits)
 
     const sortedHealerEnemy = enemy.filter(creep => creep.body.some(bodyPart => bodyPart.type == HEAL)).sort((a, b) => a.hits - b.hits)
