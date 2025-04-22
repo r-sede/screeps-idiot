@@ -194,6 +194,7 @@ const getFreeDestinationToPull = (creep, isUp) => {
                 if (isUp) {
                     creep.move(TOP_RIGHT)
                 }
+
             } else {
                 creep.move(TOP)
             }
@@ -246,6 +247,8 @@ const getFreeDestinationToPull = (creep, isUp) => {
         creep.isPulling = false
         creep.pullingCreep = null
     }
+    console.log('free.X: ' + free.x, 'free.y: '+ free.y)
+    console.log('pullingCreep.X: ' + creep.pullingCreep.x, 'pullingCreep.y: '+ creep.pullingCreep.y)
 
 }
 
