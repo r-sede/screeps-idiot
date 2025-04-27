@@ -1,16 +1,19 @@
 import { createConstructionSite, getObjectsByPrototype } from 'game/utils';
 import { StructureTower, StructureContainer, Creep, StructureSpawn, Source, } from 'game/prototypes';
 import { ERR_NOT_IN_RANGE, RESOURCE_ENERGY, MOVE, WORK, CARRY, ATTACK, RANGED_ATTACK, HEAL, TOUGH } from 'game/constants';
-import { initializeGlobals, refreshGlobals, getGlobals } from './GlobalsManager';
+import { initializeGlobals, refreshGlobals, getGlobals, refreshCombatGlobals } from './GlobalsManager';
 import { registerCreep, getMyCreeps, cleanDeadCreeps } from './CreepManager';
 import { RESOURCE_SCORE, ScoreCollector } from 'arena/season_beta/collect_and_control/basic';
 import { MyCreep } from './MyCreep';
+import { WorkerStaticState } from './States/WorkerStaticState';
+import { WorkerState } from './States/WorkerState';
 
 let counter = 0
 let shouldAttack = false
 
 
 let shouldBuildWorker = true
+let shouldBuilMover = false
 let shouldBuildHarvester = false
 let shouldBuildArmy = false
 
@@ -20,11 +23,23 @@ initializeGlobals();
 const updateFlags = () => {
     if (getMyCreeps().workers.length >= 2) {
         shouldBuildWorker = false
-        shouldBuildHarvester = true
+        shouldBuilMover = true
+        getMyCreeps().workers.forEach(worker => {
+            worker.stateMachine.changeState(new WorkerState());
+        });
     }
+    if (getMyCreeps().movers.length >= 1) {
+        shouldBuildWorker = false
+        shouldBuilMover = false
+        shouldBuildHarvester = true
 
+        getMyCreeps().workers.forEach(worker => {
+            worker.stateMachine.changeState(new WorkerStaticState());
+        });
+    }
     if (getMyCreeps().scoreHarvesters.length >= getGlobals().MAX_HARVESTER) {
         shouldBuildWorker = false
+        shouldBuilMover = false
         shouldBuildHarvester = false
         shouldBuildArmy = true
     }
@@ -41,6 +56,9 @@ export function loop() {
     updateFlags()
 
     createWorker(getGlobals().SPAWNER)
+
+    createMover(getGlobals().SPAWNER)
+
     createHarvester(getGlobals().SPAWNER)
 
     createArmy(getGlobals().SPAWNER)
@@ -71,6 +89,17 @@ const createWorker = (spawner) => {
         if (o) {
             const myCreep = new MyCreep(o, 'worker')
             registerCreep(myCreep, 'worker');
+        }
+    }
+}
+
+const createMover = (spawner) => {
+
+    if (shouldBuilMover) {
+        const o = spawner.spawnCreep([MOVE, CARRY]).object
+        if (o) {
+            const myCreep = new MyCreep(o, 'mover')
+            registerCreep(myCreep, 'mover');
         }
     }
 }
@@ -111,14 +140,7 @@ const createArmy = (spawner) => {
 }
 
 const handleAttack = (creepsArmy) => {
-    getGlobals().ENEMY = getObjectsByPrototype(Creep).filter(creep => !creep.my)
-    
-    getGlobals().SORTED_ALLY_INJURED = creepsArmy.filter(creep => creep.hits < creep.hitMax).sort((a, b) => a.hits - b.hits)
-
-    getGlobals().SORTED_ENEMY_HEALER = getGlobals().ENEMY.filter(creep => creep.body.some(bodyPart => bodyPart.type == HEAL)).sort((a, b) => a.hits - b.hits)
-
-    getGlobals().ALLY_HEALER = creepsArmy.filter(creep => creep.kind == 'heal')
-    getGlobals().ALLY_DPS = creepsArmy.filter(creep => creep.kind != 'heal')
+    refreshCombatGlobals(creepsArmy);
 
     getMyCreeps().army.forEach(armyCreep => {
         armyCreep.resetTarget()

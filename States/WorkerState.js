@@ -1,16 +1,23 @@
 import { ERR_NOT_IN_RANGE, RESOURCE_ENERGY } from 'game/constants';
-import { isActive } from '../utils';
+import { isActive, isUp } from '../utils';
 import { State } from './State';
 import { getGlobals } from '../GlobalsManager';
 
 export class WorkerState extends State {
     onEnter(creep) {
         console.log(`${creep.id} => Start Working`);
+        creep.staticPosition = null; // Reset static position
+        //il manque un truc la ...
+        const GLOBALS = getGlobals();
+        const spawnUp = isUp();
+        const availablePositions = GLOBALS.WORKER_POSITIONS[spawnUp ? 'up' : 'down'];
+        const ocupiedPosition = availablePositions.find(pos => pos.occupied && pos.x === creep.x && pos.y === creep.y);
+        ocupiedPosition.occupied = false; 
     }
 
     execute(creep) {
     if (!isActive(creep)) {return}
-    
+
     const GLOBALS = getGlobals();
 
     if (creep.store.getFreeCapacity(RESOURCE_ENERGY) > 0) {
