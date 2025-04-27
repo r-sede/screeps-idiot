@@ -90,7 +90,7 @@ export function loop() {
 const createWorker = (spawner) => {
 
     if (shouldBuildWorker) {
-        const o = spawner.spawnCreep([MOVE, WORK, CARRY]).object
+        const o = spawner.spawnCreep([MOVE, WORK, WORK,CARRY]).object
         if (o) {
             const myCreep = new MyCreep(o, 'worker')
             registerCreep(myCreep, 'worker');
@@ -140,7 +140,7 @@ const createArmy = (spawner) => {
             //     registerCreep(myCreep, 'healer');
             //     counter = 0
             // }
-            const o = spawner.spawnCreep([RANGED_ATTACK, MOVE, RANGED_ATTACK, MOVE ]).object
+            const o = spawner.spawnCreep([TOUGH, RANGED_ATTACK, MOVE, RANGED_ATTACK, MOVE, RANGED_ATTACK, MOVE ]).object
             if (o) {
                 const myCreep = new MyCreep(o, 'ranged')
                 registerCreep(myCreep, 'ranged')

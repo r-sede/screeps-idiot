@@ -21,7 +21,7 @@ export class HarvestState extends State {
             return;
         }
 
-        // --- Vérification de la validité de la cible actuelle ---
+        // --- vérification de la validité de la cible actuelle ---
         if (creep.target) {
             if (!creep.target.exists || creep.target.store[RESOURCE_SCORE] === 0) {
                 // Target détruit ou vidé -> reset
@@ -29,7 +29,7 @@ export class HarvestState extends State {
             }
         }
 
-        // --- Choix ou rechoix d'une cible ---
+        // --- choix ou rechoix d'une cible ---  
         if (!creep.target) {
             const containers = GLOBALS.CONTAINERS;
 
@@ -38,7 +38,7 @@ export class HarvestState extends State {
                 return;
             }
 
-            // Compter combien de harvesters ciblent chaque container
+            // compter combien de harvesters ciblent chaque container
             const containerTargetCount = {};
             MYCREEPS.scoreHarvesters.forEach(h => {
                 if (h.target) {
@@ -46,7 +46,7 @@ export class HarvestState extends State {
                 }
             });
 
-            // Ne prendre que les containers pas encore ciblés par plus de 2 harvesters
+            // prendre que les containers pas encore ciblés par plus de 2 harvesters
             const availableContainers = containers
                 .filter(container => (containerTargetCount[container.id] || 0) < 2)
                 .sort((a, b) => b.store[RESOURCE_SCORE] - a.store[RESOURCE_SCORE]); // Trie par quantité décroissante de score
