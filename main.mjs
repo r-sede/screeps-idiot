@@ -18,6 +18,15 @@ let shouldBuildArmy = false
 let maxHarvester = 3
 let harversterCounter = 0
 
+const CONSTANTS = {}
+CONSTANTS.ENEMY = null
+CONSTANTS.SPAWNER = getObjectsByPrototype(StructureSpawn).filter(spawner => spawner.my)[0]
+CONSTANTS.SCORECOLLECTOR = getObjectsByPrototype(ScoreCollector)[0]
+CONSTANTS.SOURCE= CONSTANTS.SPAWNER.findClosestByPath(getObjectsByPrototype(Source))
+
+const MYCREEPS = {}
+
+
 const updateFlags = () => {
     if (workers.length >= 2) {
         shouldBuildWorker = false
@@ -29,12 +38,14 @@ const updateFlags = () => {
         shouldBuildHarvester = false
         shouldBuildArmy = true
     }
-
 }
 
+
+
+
 const updateHarvesterNumber = () => {
-    const enemy = getObjectsByPrototype(Creep).filter(creep => !creep.my)
-    const harvesterEnemey = enemy.filter(creep => creep.body.some(bodyPart => bodyPart.type == CARRY) && !creep.body.some(bodyPart => bodyPart.type == WORK))
+    ENEMY = getObjectsByPrototype(Creep).filter(creep => !creep.my)
+    const harvesterEnemey = ENEMY.filter(creep => creep.body.some(bodyPart => bodyPart.type == CARRY) && !creep.body.some(bodyPart => bodyPart.type == WORK))
     // console.log(harvesterEnemey.length)
     if (harvesterEnemey.length >= 3) {
         maxHarvester = harvesterEnemey.length + 2
@@ -49,35 +60,33 @@ const cleanDeadCreeps = (creepArray) => {
 }
 
 export function loop() {
-    const spawner = getObjectsByPrototype(StructureSpawn).filter(spawner => spawner.my)[0]
-    const sources  = getObjectsByPrototype(Source)
-    const source = spawner.findClosestByPath(sources)
+    
 
-    const scoreCollector = getObjectsByPrototype(ScoreCollector)[0]
+    
 
     scoreHarvester = cleanDeadCreeps(scoreHarvester)
     // updateHarvesterNumber()
     updateFlags()
 
     if (shouldBuildWorker) {
-        const o = spawner.spawnCreep([MOVE, WORK, CARRY]).object
+        const o = CONSTANTS.SPAWNER.spawnCreep([MOVE, WORK, CARRY]).object
         if (o) {
             o.kind ='worker'
             workers.push(o)
         }
     }
 
-    createHarvester(workers, spawner)
+    createHarvester(workers, CONSTANTS.SPAWNER)
 
-    createArmy(scoreHarvester, spawner)
+    createArmy(scoreHarvester, CONSTANTS.SPAWNER)
 
     workers.forEach(worker => {
-        handleWorker(spawner, source, worker)
+        handleWorker(CONSTANTS.SPAWNER, CONSTANTS.SOURCE, worker)
     })
 
 
     scoreHarvester.forEach(worker => {
-        handleScoreHarvester(scoreCollector, worker)
+        handleScoreHarvester(CONSTANTS.SCORECOLLECTOR, worker)
     })
 
     if (creepsArmy.length > 1) {
@@ -139,9 +148,6 @@ const createArmy = (scoreHarvester, spawner) => {
     }
 }
 
-const isFuckingSpawning = (creep, spawner) => {
-    return creep.spawning || !creep.id || !creep.exists || (creep.x == spawner.x && creep.y == spawner.y)
-}
 
 const handleWorker = (spawner, source, creep) => {
     if (creep.spawning || !creep.store) {return}
@@ -194,13 +200,13 @@ const handleAttack = (creepsArmy) => {
     if (sortedInjuredCreepsArmy.length) {
         myHealers.forEach(healer => {
             if (!healer.targetToHeal) {
-                heal(healer, sortedInjuredCreepsArmy[0])
+                healer.heal(sortedInjuredCreepsArmy[0])
             }
         });
     } else {
         myHealers.forEach(healer => {
             const closeDps = healer.findClosestByPath(myDPS)
-            follow(healer, closeDps)
+            healer.follow(closeDps)
         });
     }
 
@@ -208,51 +214,37 @@ const handleAttack = (creepsArmy) => {
         myDPS.forEach(dps => {
             if (dps.kind == 'ranged') {
                 // console.log(dps)
-                rangedAttack(dps, dps.findClosestByPath(sortedHealerEnemy))
+                dps.rangedAttack(dps.findClosestByPath(sortedHealerEnemy))
             } else {
-                attack(dps, dps.findClosestByPath(sortedHealerEnemy))
+                dps.attack(dps.findClosestByPath(sortedHealerEnemy))
             }
         })
     } else if (enemy.length) {
         myDPS.forEach(dps => {
             if (dps.kind == 'ranged') {
                 // console.log(dps)
-                rangedAttack(dps, dps.findClosestByPath(enemy))
+                dps.rangedAttack(dps.findClosestByPath(enemy))
             } else {
-                attack(dps, dps.findClosestByPath(enemy))
+                dps.attack(dps.findClosestByPath(enemy))
             }
         })
     } else {
         myDPS.forEach(dps => {
             if (dps.kind == 'ranged') {
                 // console.log(dps)
-                rangedAttack(dps, dps.findClosestByPath(enemySpawn))
+                dps.rangedAttack(dps.findClosestByPath(enemySpawn))
             } else {
-                attack(dps, dps.findClosestByPath(enemySpawn))
+                dps.attack(dps.findClosestByPath(enemySpawn))
             }
         })
     }
 }
 
 
-const heal = (creep, creepToHeal) => {
-    if (creep.heal(creepToHeal) == ERR_NOT_IN_RANGE) {
-        if (creep.rangedHeal(creepToHeal) == ERR_NOT_IN_RANGE) {
-            creep.moveTo(creepToHeal);
-        }
-    }
-}
-const follow = (creep, creepToFollow) => {
-        creep.moveTo(creepToFollow)
-}
-const rangedAttack = (creep, creepToAttack) => {
-    if (creep.rangedAttack(creepToAttack) == ERR_NOT_IN_RANGE) {
-        creep.moveTo(creepToAttack);
-    }
-}
 
-const attack = (creep, creepToAttack) => {
-    if (creep.attack(creepToAttack) == ERR_NOT_IN_RANGE) {
-        creep.moveTo(creepToAttack);
-    }
+
+
+export {
+    MYCREEPS,
+    CONSTANTS
 }
