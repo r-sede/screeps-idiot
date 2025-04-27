@@ -9,10 +9,13 @@ export class HealerState extends State {
 
     execute(creep) {
         if (!isActive(creep)) {return}
-        if (getGlobals().SORTED_ALLY_INJURED.length) {
-            creep.heal(getGlobals().SORTED_ALLY_INJURED[0])
+
+        const GLOBALS = getGlobals();
+        
+        if (GLOBALS.SORTED_ALLY_INJURED.length) {
+            creep.heal(GLOBALS.SORTED_ALLY_INJURED[0])
         } else {
-            const closeDps = creep.findClosestByPath(getGlobals().ALLY_DPS)
+            const closeDps = creep.findClosestByPath(GLOBALS.ALLY_DPS)
             creep.follow(closeDps)
         }
 

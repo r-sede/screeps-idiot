@@ -10,14 +10,16 @@ export class WorkerState extends State {
 
     execute(creep) {
     if (!isActive(creep)) {return}
+    
+    const GLOBALS = getGlobals();
 
     if (creep.store.getFreeCapacity(RESOURCE_ENERGY) > 0) {
-        if (creep.harvest(getGlobals().SOURCE) === ERR_NOT_IN_RANGE) {
-            creep.moveTo(getGlobals().SOURCE)
+        if (creep.harvest(GLOBALS.SOURCE) === ERR_NOT_IN_RANGE) {
+            creep.moveTo(GLOBALS.SOURCE)
         }
     } else {
-        if (creep.transfer(getGlobals().SPAWNER, RESOURCE_ENERGY) === ERR_NOT_IN_RANGE) {
-            creep.moveTo(getGlobals().SPAWNER)
+        if (creep.transfer(GLOBALS.SPAWNER, RESOURCE_ENERGY) === ERR_NOT_IN_RANGE) {
+            creep.moveTo(GLOBALS.SPAWNER)
         }
     }
     }

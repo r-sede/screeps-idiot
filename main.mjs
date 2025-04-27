@@ -17,7 +17,6 @@ let shouldBuildArmy = false
 initializeGlobals();
 
 
-
 const updateFlags = () => {
     if (getMyCreeps().workers.length >= 2) {
         shouldBuildWorker = false
@@ -32,7 +31,7 @@ const updateFlags = () => {
 }
 
 export function loop() {
-
+    // keep this first !
     refreshGlobals();
 
     cleanDeadCreeps();

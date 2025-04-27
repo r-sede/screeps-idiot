@@ -13,19 +13,21 @@ export class HarvestState extends State {
     execute(creep) {
         if (!isActive(creep)) {return}
 
-        // if (!getGlobals().CONTAINERS || getGlobals().CONTAINERS.length === 0) {
-        //     console.log('No containers found yet.');
-        //     return; // Ne rien faire ce tick
-        // }
+        const GLOBALS = getGlobals()
 
-        const container = creep.findClosestByPath(getGlobals().CONTAINERS)
+        if (!GLOBALS.SCORECOLLECTOR) {return}
+
+        const container = creep.findClosestByPath(GLOBALS.CONTAINERS)
+
+        if (!container) {return }
+
         if (creep.store.getFreeCapacity(RESOURCE_SCORE) > 0) {
             if (creep.withdraw(container, RESOURCE_SCORE) === ERR_NOT_IN_RANGE) {
                 creep.moveTo(container)
             }
         } else {
-            if (creep.transfer(getGlobals().SCORECOLLECTOR, RESOURCE_SCORE) === ERR_NOT_IN_RANGE) {
-                creep.moveTo(getGlobals().SCORECOLLECTOR)
+            if (creep.transfer(GLOBALS.SCORECOLLECTOR, RESOURCE_SCORE) === ERR_NOT_IN_RANGE) {
+                creep.moveTo(GLOBALS.SCORECOLLECTOR)
             }
         }
     }

@@ -9,14 +9,16 @@ export class RangedState extends State {
 
     execute(creep) {
         if (!isActive(creep)) {return}
+        
+        const GLOBALS = getGlobals();
 
-        if (getGlobals().SORTED_ENEMY_HEALER.length) {
-            creep.rangedAttack(creep.findClosestByPath(getGlobals().SORTED_ENEMY_HEALER))
-        } else if (getGlobals().ENEMY.length) {
-            creep.rangedAttack(creep.findClosestByPath(getGlobals().ENEMY))
+        if (GLOBALS.SORTED_ENEMY_HEALER.length) {
+            creep.rangedAttack(creep.findClosestByPath(GLOBALS.SORTED_ENEMY_HEALER))
+        } else if (GLOBALS.ENEMY.length) {
+            creep.rangedAttack(creep.findClosestByPath(GLOBALS.ENEMY))
         } else {
-            console.log(getGlobals().ENEMY_SPAWNER)
-            creep.rangedAttack(getGlobals().ENEMY_SPAWNER)
+            console.log(GLOBALS.ENEMY_SPAWNER)
+            creep.rangedAttack(GLOBALS.ENEMY_SPAWNER)
         }
     }
 
