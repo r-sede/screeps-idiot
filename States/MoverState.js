@@ -27,7 +27,7 @@ export class MoverState extends State {
         }
 
         if (creep.store.getFreeCapacity(RESOURCE_ENERGY) > 0) {
-            // 🛒 1. Chercher de l'énergie au sol
+            // Chercher de l'énergie au sol
             const droppedResources = getObjectsByPrototype(Resource).filter(r => r.resourceType === RESOURCE_ENERGY);
             const closestDrop = creep.findClosestByPath(droppedResources);
 
@@ -36,12 +36,11 @@ export class MoverState extends State {
                     creep.moveTo(closestDrop);
                 }
             } else {
-                // Pas de ressource au sol -> idle / attendre / se rapprocher des workers
-                // Option : bouger vers les workers statiques si besoin
+                // Pas de ressource au sol 
             }
 
         } else {
-            // 📦 2. Transporter vers le Spawn
+            // Transporter vers le Spawn
             if (creep.transfer(GLOBALS.SPAWNER, RESOURCE_ENERGY) === ERR_NOT_IN_RANGE) {
                 creep.moveTo(GLOBALS.SPAWNER);
             }

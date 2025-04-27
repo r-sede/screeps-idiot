@@ -6,7 +6,7 @@ import { getGlobals } from '../GlobalsManager';
 export class WorkerState extends State {
     onEnter(creep) {
         console.log(`${creep.id} => Start Working`);
-        creep.staticPosition = null; // Reset static position
+        creep.staticPosition = null; 
         //il manque un truc la ...
         const GLOBALS = getGlobals();
         const spawnUp = isUp();

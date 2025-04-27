@@ -15,8 +15,8 @@ export class MyCreep {
 
     this.kind = kind; // 'worker', 'harvester', 'ranged', 'healer'
 
-    this._target = null; // depend on role
-    this._targetType = null; // depend on role
+    this._target = null; 
+    this._targetType = null; 
 
 
     switch (kind) {
