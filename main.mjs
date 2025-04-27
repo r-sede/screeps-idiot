@@ -5,8 +5,6 @@ import { initializeGlobals, refreshGlobals, getGlobals, refreshCombatGlobals } f
 import { registerCreep, getMyCreeps, cleanDeadCreeps } from './CreepManager';
 import { RESOURCE_SCORE, ScoreCollector } from 'arena/season_beta/collect_and_control/basic';
 import { MyCreep } from './MyCreep';
-import { WorkerStaticState } from './States/WorkerStaticState';
-import { WorkerState } from './States/WorkerState';
 
 let counter = 0
 let shouldAttack = false
@@ -21,20 +19,23 @@ initializeGlobals();
 
 
 const updateFlags = () => {
-    if (getMyCreeps().workers.length >= 2) {
+
+    // if (getMyCre eps().workers.length < 2) {
+    //     getMyCreeps().workers.forEach(worker => {
+    //         worker.stateMachine.changeState(new WorkerState());
+    //     });
+    // }
+
+    if (getMyCreeps().workers.length >= 3) {
         shouldBuildWorker = false
         shouldBuilMover = true
-        getMyCreeps().workers.forEach(worker => {
-            worker.stateMachine.changeState(new WorkerState());
-        });
     }
     if (getMyCreeps().movers.length >= 1) {
         shouldBuildWorker = false
         shouldBuilMover = false
         shouldBuildHarvester = true
-
         getMyCreeps().workers.forEach(worker => {
-            worker.stateMachine.changeState(new WorkerStaticState());
+            worker.stateMachine.changeState('workerStaticState');
         });
     }
     if (getMyCreeps().scoreHarvesters.length >= getGlobals().MAX_HARVESTER) {
@@ -65,6 +66,10 @@ export function loop() {
 
     getMyCreeps().workers.forEach(worker => {
         worker.stateMachine.update()
+    })
+
+    getMyCreeps().movers.forEach(mover => {
+        mover.stateMachine.update()
     })
 
 
@@ -128,11 +133,17 @@ const createArmy = (spawner) => {
                 counter++
             }
         } else if (counter == 6) {
-            //heal
-            const o = spawner.spawnCreep([MOVE, HEAL, MOVE, HEAL]).object
+            // //heal
+            // const o = spawner.spawnCreep([MOVE, HEAL, MOVE, HEAL]).object
+            // if (o) {
+            //     const myCreep = new MyCreep(o, 'healer')
+            //     registerCreep(myCreep, 'healer');
+            //     counter = 0
+            // }
+            const o = spawner.spawnCreep([RANGED_ATTACK, MOVE, RANGED_ATTACK, MOVE ]).object
             if (o) {
-                const myCreep = new MyCreep(o, 'healer')
-                registerCreep(myCreep, 'healer');
+                const myCreep = new MyCreep(o, 'ranged')
+                registerCreep(myCreep, 'ranged')
                 counter = 0
             }
         }

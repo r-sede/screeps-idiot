@@ -27,8 +27,9 @@ export class WorkerStaticState extends State {
     execute(creep) {
         if (!isActive(creep)) { return; }
 
-        const GLOBALS = getGlobals();
         
+        const GLOBALS = getGlobals();
+
         if (!creep.staticPosition) return; // Pas de position assignée
 
         if (creep.x !== creep.staticPosition.x || creep.y !== creep.staticPosition.y) {

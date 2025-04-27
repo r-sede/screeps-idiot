@@ -6,8 +6,6 @@ export function isActive(myCreep) {
     return myCreep.creep && myCreep.exists && !myCreep.spawning;
 }
 
-
-
 const isFuckingSpawning = (myCreep) => {
     return myCreep.spawning || !myCreep.id || !myCreep.exists || (myCreep.x == getGlobals().SPAWNER.x && myCreep.y == getGlobals().SPAWNER.y)
 }

@@ -8,11 +8,16 @@ export class WorkerState extends State {
         console.log(`${creep.id} => Start Working`);
         creep.staticPosition = null; 
         //il manque un truc la ...
-        const GLOBALS = getGlobals();
-        const spawnUp = isUp();
-        const availablePositions = GLOBALS.WORKER_POSITIONS[spawnUp ? 'up' : 'down'];
-        const ocupiedPosition = availablePositions.find(pos => pos.occupied && pos.x === creep.x && pos.y === creep.y);
-        ocupiedPosition.occupied = false; 
+        if (creep.x) {
+            const GLOBALS = getGlobals();
+            const spawnUp = isUp();
+            const availablePositions = GLOBALS.WORKER_POSITIONS[spawnUp ? 'up' : 'down'];
+            const ocupiedPosition = availablePositions.find(pos => pos.occupied && pos.x === creep.x && pos.y === creep.y);
+            if (ocupiedPosition) {
+                ocupiedPosition.occupied = false; 
+            }
+        }
+
     }
 
     execute(creep) {
@@ -32,6 +37,6 @@ export class WorkerState extends State {
     }
 
     onExit(creep) {
-        console.log(`${creep.id} => Stop Harvesting`);
+        console.log(`${creep.id} => Stop Working`);
     }
 }

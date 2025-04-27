@@ -1,10 +1,11 @@
 import { Creep } from "game/prototypes";
 import { StateMachine } from './StateMachine';
 import { ERR_NOT_IN_RANGE } from "game/constants";
-import { WorkerState } from "./States/WorkerState";
-import { HarvestState } from "./States/HarvestState";
-import { RangedState } from "./States/RangedState";
-import { HealerState } from "./States/HealerState";
+// import { WorkerState } from "./States/WorkerState";
+// import { MoverState } from "./States/MoverState";
+// import { HarvestState } from "./States/HarvestState";
+// import { RangedState } from "./States/RangedState";
+// import { HealerState } from "./States/HealerState";
 
 export class MyCreep {
   constructor(creep, kind) {
@@ -21,16 +22,22 @@ export class MyCreep {
 
     switch (kind) {
         case "worker":
-            this.stateMachine = new StateMachine(this, new WorkerState());
+            this.stateMachine = new StateMachine(this, 'workerState');
+            break;
+        case "mover":
+            this.stateMachine = new StateMachine(this, 'moverState');
             break;
         case "harvester":
-            this.stateMachine = new StateMachine(this, new HarvestState());
+            this.stateMachine = new StateMachine(this, 'harvestState');
             break;
         case "ranged":
-            this.stateMachine = new StateMachine(this, new RangedState());
+            this.stateMachine = new StateMachine(this, 'rangedState');
             break;
         case "healer":
-            this.stateMachine = new StateMachine(this, new HealerState());
+            this.stateMachine = new StateMachine(this, 'healerState');
+            break;
+        case "workerStaticState":
+            this.stateMachine = new StateMachine(this, 'workerStaticState');
             break;
         default:
             throw new Error("Invalid creep type");

@@ -11,7 +11,7 @@ const GLOBALS = {
     ENEMY_SPAWNER: null,
     SCORECOLLECTOR: null,
     SOURCE: null,
-    MAX_HARVESTER: 3,
+    MAX_HARVESTER: 4,
     SORTED_ALLY_INJURED: [],
     SORTED_ENEMY_HEALER: [],
     ALLY_HEALER: [],
