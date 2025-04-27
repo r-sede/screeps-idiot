@@ -1,7 +1,7 @@
 import { RESOURCE_SCORE } from 'arena/season_beta/collect_and_control/basic';
 import { getMyCreeps } from '../CreepManager';
 import { getGlobals } from '../GlobalsManager';
-import { isActive } from '../utils';
+import { findBestContainer, isActive } from '../utils';
 import { State } from './State';
 import { ERR_NOT_IN_RANGE } from 'game/constants';
 
@@ -20,6 +20,8 @@ export class HarvestState extends State {
             console.log(`No score collector available for Harvester ${creep.id}`);
             return;
         }
+
+        // console.log('Visible containers:', GLOBALS.CONTAINERS.map(c => `${c.id}:${c.store.score}`));
 
         // --- vérification de la validité de la cible actuelle ---
         if (creep.target) {
@@ -53,7 +55,7 @@ export class HarvestState extends State {
 
             let chosenContainer = null;
             if (availableContainers.length > 0) {
-                chosenContainer = creep.findClosestByPath(availableContainers);
+                chosenContainer = findBestContainer(creep, availableContainers);
             } else {
                 // Tous saturés -> prendre malgré tout le plus proche de tous les containers
                 const sortedAllContainers = containers.sort((a, b) => b.store[RESOURCE_SCORE] - a.store[RESOURCE_SCORE]);

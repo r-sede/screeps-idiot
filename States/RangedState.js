@@ -9,7 +9,7 @@ export class RangedState extends State {
 
     execute(creep) {
         if (!isActive(creep)) {return}
-        
+
         const GLOBALS = getGlobals();
 
         if (GLOBALS.SORTED_ENEMY_HEALER.length) {
@@ -17,7 +17,7 @@ export class RangedState extends State {
         } else if (GLOBALS.ENEMY.length) {
             creep.rangedAttack(creep.findClosestByPath(GLOBALS.ENEMY))
         } else {
-            console.log(GLOBALS.ENEMY_SPAWNER)
+            // console.log(GLOBALS.ENEMY_SPAWNER)
             creep.rangedAttack(GLOBALS.ENEMY_SPAWNER)
         }
     }

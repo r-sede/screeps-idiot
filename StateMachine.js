@@ -30,7 +30,6 @@ export class StateMachine {
             this.previousState = this.currentState;
             this.currentState = newState;
             if (this.currentState) {
-                console.log('onEnter')
                 this.states[this.currentState].onEnter(this.owner);
             }
         }

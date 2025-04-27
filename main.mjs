@@ -26,7 +26,7 @@ const updateFlags = () => {
     //     });
     // }
 
-    if (getMyCreeps().workers.length >= 3) {
+    if (getMyCreeps().workers.length >= 2) {
         shouldBuildWorker = false
         shouldBuilMover = true
     }
@@ -48,12 +48,12 @@ const updateFlags = () => {
 
 export function loop() {
     // keep this first !
-    refreshGlobals();
+    refreshGlobals()
 
-    cleanDeadCreeps();
+    cleanDeadCreeps()
 
 
-    // updateHarvesterNumber()
+    updateHarvesterNumber()
     updateFlags()
 
     createWorker(getGlobals().SPAWNER)
@@ -126,7 +126,7 @@ const createArmy = (spawner) => {
     if (shouldBuildArmy) {
         if (counter == 0 || counter == 1 || counter == 2 || counter == 3 || counter == 4 || counter == 5) {
             //ranged
-            const o = spawner.spawnCreep([RANGED_ATTACK, MOVE, RANGED_ATTACK, MOVE ]).object
+            const o = spawner.spawnCreep([TOUGH, RANGED_ATTACK, MOVE, RANGED_ATTACK, MOVE, RANGED_ATTACK, MOVE ]).object
             if (o) {
                 const myCreep = new MyCreep(o, 'ranged')
                 registerCreep(myCreep, 'ranged')
@@ -162,10 +162,10 @@ const handleAttack = (creepsArmy) => {
 
 const updateHarvesterNumber = () => {
     const harvesterEnemey = getGlobals().ENEMY.filter(creep => creep.body.some(bodyPart => bodyPart.type == CARRY) && !creep.body.some(bodyPart => bodyPart.type == WORK))
-    if (harvesterEnemey.length >= 3) {
+    if (harvesterEnemey.length >= 6) {
         getGlobals().MAX_HARVESTER = harvesterEnemey.length + 2
     } else {
-        getGlobals().MAX_HARVESTER = 3
+        getGlobals().MAX_HARVESTER = 6
     }
 }
 

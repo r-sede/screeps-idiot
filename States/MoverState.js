@@ -33,7 +33,7 @@ export class MoverState extends State {
             const droppedResources = getObjectsByPrototype(Resource).filter(r => r.resourceType === RESOURCE_ENERGY);
 
             // Chercher les ressources proches (par range, pas besoin d'un vrai path)
-            const nearbyDrops = creep.findInRange(droppedResources, 3); // Exemple: dans un rayon de 3 cases
+            const nearbyDrops = creep.findInRange(droppedResources, 3); // dans un rayon de 3 cases
 
             if (nearbyDrops.length > 0) {
                 const closestDrop = creep.findClosestByRange(nearbyDrops);
