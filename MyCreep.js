@@ -1,6 +1,10 @@
 import { Creep } from "game/prototypes";
 import { StateMachine } from './StateMachine';
 import { ERR_NOT_IN_RANGE } from "game/constants";
+import { WorkerState } from "./States/WorkerState";
+import { HarvestState } from "./States/HarvestState";
+import { RangedState } from "./States/RangedState";
+import { HealerState } from "./States/HealerState";
 
 export class MyCreep {
   constructor(creep, kind) {
@@ -9,18 +13,25 @@ export class MyCreep {
      */
     this.creep = creep;
 
-    this.kind = kind; // 'worker', 'harvester', 'army'
+    this.kind = kind; // 'worker', 'harvester', 'ranged', 'healer'
+
+    this._target = null; // depend on role
+    this._targetType = null; // depend on role
+
 
     switch (kind) {
-        // case "worker":
-        //     this.stateMachine = new StateMachine(this, new WorkerState());
-        //     break;
-        // case "harvester":
-        //     this.stateMachine = new StateMachine(this, new HarvestState());
-        //     break;
-        // case "army":
-        //     this.stateMachine = new StateMachine(this, new ArmyState());
-        //     break;
+        case "worker":
+            this.stateMachine = new StateMachine(this, new WorkerState());
+            break;
+        case "harvester":
+            this.stateMachine = new StateMachine(this, new HarvestState());
+            break;
+        case "ranged":
+            this.stateMachine = new StateMachine(this, new RangedState());
+            break;
+        case "healer":
+            this.stateMachine = new StateMachine(this, new HealerState());
+            break;
         default:
             throw new Error("Invalid creep type");
         }
@@ -71,6 +82,27 @@ export class MyCreep {
     return this.creep.spawning;
   }
 
+  get target() {
+    return this._target;
+  }
+
+  set target(value) {
+    this._target = value;
+  }
+
+  get targetType() {
+    return this._targetType;
+  }
+
+  set targetType(value) {
+    this._targetType = value;
+  }
+
+  // --- Methods ---
+  resetTarget() {
+    this._target = null;
+    this._targetType = null;
+  }
   // --- Methods ---
 
   _attack(target) {
@@ -113,7 +145,7 @@ export class MyCreep {
     return this.creep.rangedAttack(target);
   }
 
-  rangedHeal(target) {
+  _rangedHeal(target) {
     return this.creep.rangedHeal(target);
   }
 
@@ -151,23 +183,23 @@ export class MyCreep {
 
   heal(creepToHeal) {
     if (this._heal(creepToHeal) == ERR_NOT_IN_RANGE) {
-        if (this.rangedHeal(creepToHeal) == ERR_NOT_IN_RANGE) {
+        if (this._rangedHeal(creepToHeal) == ERR_NOT_IN_RANGE) {
             this.moveTo(creepToHeal);
         }
     }
 }
-    follow(creepToFollow) {
-            this.moveTo(creepToFollow)
-    }
-    rangedAttack(creepToAttack) {
-        if (this._rangedAttack(creepToAttack) == ERR_NOT_IN_RANGE) {
-            this.moveTo(creepToAttack);
-        }
-    }
+  follow(creepToFollow) {
+          this.moveTo(creepToFollow)
+  }
+  rangedAttack(creepToAttack) {
+      if (this._rangedAttack(creepToAttack) == ERR_NOT_IN_RANGE) {
+          this.moveTo(creepToAttack);
+      }
+  }
 
-    attack(creepToAttack) {
-        if (this._attack(creepToAttack) == ERR_NOT_IN_RANGE) {
-            this.moveTo(creepToAttack);
-        }
-    }
+  attack(creepToAttack) {
+      if (this._attack(creepToAttack) == ERR_NOT_IN_RANGE) {
+          this.moveTo(creepToAttack);
+      }
+  }
 }
